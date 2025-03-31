@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:taskmanage/features/task/presentation/pages/calender_page.dart';
 import 'package:taskmanage/features/task/presentation/pages/task_page.dart';
+import 'package:taskmanage/features/task/presentation/pages/calendar_page.dart';
 
 import '../../../../core/common/widgets/bottom_nav_bar.dart';
 
@@ -17,9 +17,9 @@ class TaskLayoutPage extends StatefulWidget {
 class _TaskLayoutPageState extends State<TaskLayoutPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = const [
+  final List<Widget> _pages = [
     TaskPage(),
-    CalenderPage(),
+    CalendarPage()
     // Add more pages here as needed
   ];
 

@@ -11,5 +11,8 @@ class AppPallete {
   static const Color errorColor = Color(0xFFEC4C4C);
   static const Color successColor = Color(0xFF4CAF50);
   static const Color transparentColor = Colors.transparent;
+  static const Color highPriorityColor = Color(0xFFE53935); // Red
+  static const Color mediumPriorityColor = Color(0xFFFFB300); // Amber
+  static const Color lowPriorityColor = Color(0xFF43A047); // Green
   static const Color highlightColor = Color(0x33007AFF); // Light blue highlight
 }

@@ -231,11 +231,11 @@ class _TaskPageState extends State<TaskPage> {
                                 });
                               },
                               selectedColor: AppPallete.gradient1,
-                              backgroundColor: AppPallete.backgroundColor,
+                              backgroundColor: AppPallete.gradient3,
                               labelStyle: TextStyle(
                                 color: isSelected
-                                    ? AppPallete.successColor
-                                    : AppPallete.gradient1,
+                                    ? AppPallete.whiteColor
+                                    : AppPallete.highPriorityColor,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),

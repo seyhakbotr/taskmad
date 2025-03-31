@@ -5,15 +5,18 @@ import 'package:taskmanage/features/task/domain/entities/task.dart';
 import 'package:taskmanage/features/task/domain/entities/topic.dart';
 
 abstract class TaskOperationState {
-  const TaskOperationState();
+  final List<Task>? tasks;
+  const TaskOperationState({this.tasks});
 }
 
 class TaskOperationInitial extends TaskOperationState {
-  const TaskOperationInitial();
+  const TaskOperationInitial() : super(tasks: null);
 }
 
 class TaskOperationLoading extends TaskOperationState {
-  const TaskOperationLoading();
+  final List<Task>? previousTasks;
+  const TaskOperationLoading({this.previousTasks})
+      : super(tasks: previousTasks);
 }
 
 class TaskOperationSuccess extends TaskOperationState {

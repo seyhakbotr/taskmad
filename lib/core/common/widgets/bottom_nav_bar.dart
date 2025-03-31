@@ -22,30 +22,31 @@ class MyBottomNavBar extends StatelessWidget {
         ),
       ),
       child: GNav(
-        backgroundColor: AppPallete.backgroundColor, // Match the dark theme
+        backgroundColor: AppPallete.backgroundColor,
         color: AppPallete.greyColor, // Inactive icon color
-        activeColor: AppPallete.whiteColor, // Active icon and text color
-        tabBackgroundColor: AppPallete.gradient2
-            .withOpacity(0.2), // Subtle background for active tab
+        activeColor: Colors.white, // Active icon and text color
+        tabBackgroundColor: AppPallete.gradient1,
         tabBorderRadius: 16,
-        gap: 8, // Increased space between icon and text
-        padding: const EdgeInsets.symmetric(
-            horizontal: 15, vertical: 8), // Reduced padding inside each tab
-        iconSize: 20, // Smaller icon size
+        gap: 8,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        iconSize: 20,
         textStyle: const TextStyle(
-          fontSize: 12, // Smaller text size
+          fontSize: 12,
           fontWeight: FontWeight.w500,
+          color: Colors.white, // Explicitly set text color here
         ),
-        mainAxisAlignment: MainAxisAlignment.spaceAround, // Space out tabs
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         onTabChange: (value) => onTabChange(value),
         tabs: const [
           GButton(
             icon: Icons.home,
             text: 'Blogs',
+            // Remove textColor from here as it's handled by textStyle
           ),
           GButton(
-            icon: Icons.search,
-            text: 'Search',
+            icon: Icons.calendar_view_week_outlined,
+            text: 'Calendar',
+            // Remove textColor from here as it's handled by textStyle
           ),
         ],
       ),

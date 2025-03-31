@@ -124,11 +124,17 @@ class TaskOperationCubit extends Cubit<TaskOperationState> {
     required String userId,
     List<String>? topicIds,
   }) async {
-    emit(TaskOperationLoading());
+    final previousTasks = state is TaskOperationSuccessWithTasks
+        ? (state as TaskOperationSuccessWithTasks).tasks
+        : null;
+
+    emit(TaskOperationLoading(previousTasks: previousTasks));
+
     final result = await getUserTasks(GetUserTasksParams(
       userId: userId,
       topicIds: topicIds,
     ));
+
     emit(result.fold(
       (failure) => TaskOperationFailure(failure),
       (tasks) => TaskOperationSuccessWithTasks(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:taskmanage/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:taskmanage/core/common/widgets/loader.dart';
 import 'package:taskmanage/core/themes/app_pallete.dart';
 import 'package:taskmanage/core/utils/pick_image.dart';
 import 'package:taskmanage/core/utils/show_snackbar.dart';
@@ -12,6 +13,7 @@ import 'package:taskmanage/features/task/domain/entities/task.dart';
 import 'package:taskmanage/features/task/domain/entities/topic.dart';
 import 'package:taskmanage/features/task/presentation/cubit/task_operation_cubit.dart';
 import 'package:taskmanage/features/task/presentation/cubit/task_operation_state.dart';
+import 'package:taskmanage/features/task/presentation/pages/task_viewer_page.dart';
 import 'package:taskmanage/features/task/presentation/widgets/add_task_dialog.dart';
 
 class TaskListWidget extends StatefulWidget {
@@ -48,27 +50,25 @@ class _TaskListWidgetState extends State<TaskListWidget> {
         }
       },
       builder: (context, state) {
-        if (state is TaskOperationLoading || state is TaskOperationUpdating) {
-          return const Center(child: CircularProgressIndicator());
+        if (state is TaskOperationLoading) {
+          // If we have previous tasks, show them while loading
+          if (state.previousTasks != null && state.previousTasks!.isNotEmpty) {
+            return _buildTaskList(context, state.previousTasks!);
+          }
+          return const Loader();
+        } else if (state is TaskOperationUpdating ||
+            state is TaskOperationInitial) {
+          return const Loader();
         } else if (state is TaskOperationFailure) {
           return _buildErrorState(context, state);
         } else if (state is TaskOperationSuccessWithTasks) {
-          print("TaskSuccess as JSON:");
-          for (var task in state.tasks) {
-            print({
-              'id': task.id,
-              'title': task.title,
-              'description': task.description,
-              'status': task.status,
-              'priority': task.priority,
-              'dueDate': task.dueDate?.toString(),
-              'imageUrl': task.imageUrl,
-              'topics': task.topics,
-            });
+          if (state.tasks.isEmpty) {
+            return _buildEmptyState();
           }
           return _buildTaskList(context, state.tasks);
         }
-        return const Center(child: Text('No tasks available'));
+        // This should rarely be reached if states are handled properly
+        return const Center(child: Text(''));
       },
     );
   }
@@ -200,6 +200,16 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                         color: AppPallete.gradient1),
                     itemBuilder: (context) => [
                       const PopupMenuItem(
+                        value: 'view',
+                        child: Row(
+                          children: [
+                            Icon(Icons.visibility, color: AppPallete.gradient1),
+                            SizedBox(width: 8),
+                            Text('View Details'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
@@ -221,7 +231,14 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                       ),
                     ],
                     onSelected: (value) {
-                      if (value == 'edit') {
+                      if (value == 'view') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TaskViewerPage(task: task),
+                          ),
+                        );
+                      } else if (value == 'edit') {
                         _showEditDialog(context, task);
                       } else if (value == 'delete') {
                         _confirmDelete(context, task);
@@ -237,6 +254,22 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                 Text(
                   task.description!,
                   style: const TextStyle(color: AppPallete.gradient2),
+                ),
+              ],
+
+              // Topics display (NEW SECTION)
+              if (task.topics?.isNotEmpty ?? false) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: task.topics!.map((topic) {
+                    return Chip(
+                      label: Text(topic),
+                      backgroundColor: AppPallete.gradient1.withOpacity(0.1),
+                      labelStyle: const TextStyle(color: AppPallete.gradient1),
+                    );
+                  }).toList(),
                 ),
               ],
 
@@ -263,7 +296,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        task.priority!,
+                        task.priority!.toUpperCase(),
                         style:
                             const TextStyle(color: Colors.white, fontSize: 12),
                       ),
