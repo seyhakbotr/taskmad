@@ -32,25 +32,25 @@ class UpdateTask implements UseCase<Task, UpdateTaskParams> {
 class UpdateTaskParams {
   final String taskId;
   final File? image;
-  final String title;
-  final String description;
+  final String? title;
+  final String? description;
   final String creatorId;
-  final DateTime dueDate;
-  final String priority;
-  final String status;
-  final List<Topic> topics;
+  final DateTime? dueDate;
+  final String? priority;
+  final String? status;
+  final List<Topic>? topics;
   final String? currentImageUrl;
 
   UpdateTaskParams({
     required this.taskId,
     this.image,
-    required this.title,
-    required this.description,
+    this.title,
+    this.description,
     required this.creatorId,
-    required this.dueDate,
-    required this.priority,
-    required this.status,
-    required this.topics,
+    this.dueDate,
+    this.priority,
+    this.status,
+    this.topics,
     this.currentImageUrl,
   });
 }

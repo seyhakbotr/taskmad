@@ -25,13 +25,13 @@ abstract interface class TaskRepository {
   Future<fp.Either<Failures, Task>> updateTask({
     required String taskId,
     File? image,
-    required String title,
-    required DateTime dueDate,
-    required String priority,
-    required String status,
-    required String description,
+    String? title,
+    DateTime? dueDate,
+    String? priority,
+    String? status,
+    String? description,
     required String creatorId,
-    required List<Topic> topics,
+    List<Topic>? topics,
     String? currentImageUrl,
   });
 }

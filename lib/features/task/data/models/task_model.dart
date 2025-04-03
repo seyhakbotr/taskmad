@@ -32,7 +32,20 @@ class TaskModel extends Task {
           : DateTime.parse(map['updated_at']),
     );
   }
-
+  factory TaskModel.fromEntity(Task task) {
+    return TaskModel(
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      imageUrl: task.imageUrl,
+      topics: task.topics ?? [],
+      creatorId: task.creatorId,
+      dueDate: task.dueDate,
+      updatedAt: task.updatedAt,
+    );
+  }
   TaskModel copyWith({
     String? id,
     String? title,

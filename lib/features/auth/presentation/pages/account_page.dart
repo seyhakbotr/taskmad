@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskmanage/core/themes/app_pallete.dart';
 
 import '../../../../core/common/widgets/navigation_tile.dart';
 import 'subpage/custom_license_page.dart';
@@ -13,7 +14,13 @@ class AccountPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("My Account"),
+          title: Text(
+            "My Account",
+            style: TextStyle(
+              color: AppPallete.gradient1,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           centerTitle: true,
         ),
         body: Center(

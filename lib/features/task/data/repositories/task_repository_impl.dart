@@ -4,7 +4,6 @@ import 'package:fpdart/fpdart.dart' as fp; // Aliased as 'fp'
 import 'package:taskmanage/core/error/exceptions.dart';
 import 'package:taskmanage/core/error/failures.dart';
 import 'package:taskmanage/core/network/connection_checker.dart';
-import 'package:taskmanage/core/utils/helper_function.dart';
 import 'package:taskmanage/features/task/data/datasources/task_remote_data_source.dart';
 import 'package:taskmanage/features/task/data/models/task_model.dart';
 import 'package:taskmanage/features/task/domain/entities/topic.dart';
@@ -53,13 +52,13 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<fp.Either<Failures, Task>> updateTask({
     required String taskId,
     File? image,
-    required String title,
-    required String description,
-    required String creatorId,
-    required DateTime dueDate,
-    required String priority,
-    required String status,
-    required List<Topic> topics,
+    String? title,
+    String? description,
+    required creatorId,
+    DateTime? dueDate,
+    String? priority,
+    String? status,
+    List<Topic>? topics,
     String? currentImageUrl,
   }) async {
     try {
@@ -72,22 +71,22 @@ class TaskRepositoryImpl implements TaskRepository {
       print("title: $title");
       print("description: $description");
       print("creatorId: $creatorId");
-      print("dueDate: ${dueDate.toIso8601String()}");
+      print("dueDate: ${dueDate?.toIso8601String()}");
       print("priority: $priority");
       print("status: $status");
-      print("topics: ${topics.map((topic) => topic.id).join(', ')}");
+      print("topics: ${topics?.map((topic) => topic.id).join(', ')}");
       print("currentImageUrl: $currentImageUrl");
       TaskModel updatedTask = TaskModel(
         id: taskId,
         creatorId: creatorId,
-        title: title,
+        title: title ?? '',
         description: description,
         dueDate: dueDate,
         priority: priority,
         status: status,
         imageUrl: currentImageUrl ?? '',
         topics: topics
-            .map((topic) => topic.id)
+            ?.map((topic) => topic.id)
             .toList(), // Extract IDs for insertion
         updatedAt: DateTime.now(),
       );
@@ -106,8 +105,9 @@ class TaskRepositoryImpl implements TaskRepository {
           await taskRemoteDataSource.updateTask(updatedTask);
 
       // Handle topic associations
-      await taskRemoteDataSource.updateTaskTopics(taskId, topics);
-
+      if (topics != null) {
+        await taskRemoteDataSource.updateTaskTopics(taskId, topics);
+      }
       return fp.right(updatedTaskModel); // fp.right + convert to Task
     } on ServerException catch (e) {
       return fp.left(Failures(e.message));

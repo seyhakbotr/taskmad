@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -164,7 +165,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (name != null) {
         await supabaseClient
-            .from('profiles')
+            .from('users')
             .update({'name': updatedName}).eq('id', currentUserData.id);
       }
 

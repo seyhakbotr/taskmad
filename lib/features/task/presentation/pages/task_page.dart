@@ -84,7 +84,6 @@ class _TaskPageState extends State<TaskPage> {
       ),
       body: BlocConsumer<TaskOperationCubit, TaskOperationState>(
         listener: (context, state) {
-          // Handle side effects here, such as showing Snackbars if needed
           if (state is TaskOperationFailure) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Error: ${state.failure.message}'),
@@ -93,12 +92,12 @@ class _TaskPageState extends State<TaskPage> {
         },
         builder: (context, state) {
           final cubit = context.read<TaskOperationCubit>();
-          final topics = cubit.availableTopics; // Using cubit's allTaskTopics
+          final topics = cubit.availableTopics;
 
           return RefreshIndicator(
             onRefresh: () async {
-              _fetchUserTasks();
               _fetchTopics();
+              _fetchUserTasks();
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -121,67 +120,135 @@ class _TaskPageState extends State<TaskPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Upcoming Deadlines',
+                            'Task Progress',
                             style: TextStyle(
                               color: AppPallete.gradient1,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 16),
                           BlocBuilder<TaskOperationCubit, TaskOperationState>(
                             builder: (context, state) {
-                              final upcoming = state
-                                      is TaskOperationSuccessWithTasks
-                                  ? state.tasks
-                                      .where((t) =>
-                                          t.dueDate != null &&
-                                          t.dueDate!.isAfter(DateTime.now()))
-                                      .take(3)
-                                      .toList()
-                                  : [];
+                              if (state is! TaskOperationSuccessWithTasks) {
+                                return const CircularProgressIndicator();
+                              }
 
-                              if (upcoming.isEmpty) {
+                              final tasks = state.tasks;
+                              final totalTasks = tasks.length;
+
+                              if (totalTasks == 0) {
                                 return const Text(
-                                  'No upcoming deadlines',
+                                  'No tasks available',
                                   style: TextStyle(color: AppPallete.gradient2),
                                 );
                               }
 
+                              // Count tasks by status
+                              final doneCount =
+                                  tasks.where((t) => t.status == 'done').length;
+                              final inProgressCount = tasks
+                                  .where((t) => t.status == 'in_progress')
+                                  .length;
+                              final todoCount =
+                                  tasks.where((t) => t.status == 'todo').length;
+
+                              // Calculate percentages
+                              final donePercent = doneCount / totalTasks;
+                              final inProgressPercent =
+                                  inProgressCount / totalTasks;
+                              final todoPercent = todoCount / totalTasks;
+
                               return Column(
-                                children: upcoming
-                                    .map((task) => Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 4),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.calendar_today,
-                                                size: 16,
-                                                color: AppPallete.gradient1,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(
-                                                  task.title,
-                                                  style: const TextStyle(
-                                                      color:
-                                                          AppPallete.gradient1),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
+                                children: [
+                                  // Progress bar
+                                  SizedBox(
+                                    height: 20,
+                                    child: Stack(
+                                      children: [
+                                        // Background
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: AppPallete.borderColor
+                                                .withOpacity(0.2),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                        // Progress segments
+                                        Row(
+                                          children: [
+                                            // Done portion
+                                            Expanded(
+                                              flex: (donePercent * 100).round(),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors
+                                                      .green, // Done color
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(10),
+                                                    bottomLeft:
+                                                        Radius.circular(10),
+                                                  ),
                                                 ),
                                               ),
-                                              Text(
-                                                DateFormat('MMM dd')
-                                                    .format(task.dueDate!),
-                                                style: const TextStyle(
-                                                    color:
-                                                        AppPallete.gradient2),
+                                            ),
+                                            // In Progress portion
+                                            Expanded(
+                                              flex: (inProgressPercent * 100)
+                                                  .round(),
+                                              child: Container(
+                                                color: Colors
+                                                    .blue, // In Progress color
                                               ),
-                                            ],
-                                          ),
-                                        ))
-                                    .toList(),
+                                            ),
+                                            // Todo portion
+                                            Expanded(
+                                              flex: (todoPercent * 100).round(),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      Colors.grey, // Todo color
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(10),
+                                                    bottomRight:
+                                                        Radius.circular(10),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Legend
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _buildLegendItem(
+                                          'Done', Colors.green, doneCount),
+                                      _buildLegendItem('In Progress',
+                                          Colors.blue, inProgressCount),
+                                      _buildLegendItem(
+                                          'To Do', Colors.grey, todoCount),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${(donePercent * 100).toStringAsFixed(1)}% done',
+                                    style: TextStyle(
+                                      color: AppPallete.gradient1,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               );
                             },
                           ),
@@ -259,22 +326,11 @@ class _TaskPageState extends State<TaskPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'Recent Tasks',
+                          'All Tasks',
                           style: TextStyle(
                             color: AppPallete.gradient1,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () => _viewAllTasks(),
-                          child: const Text(
-                            'View All',
-                            style: TextStyle(
-                              color: AppPallete.gradient2,
-                              fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.underline,
-                            ),
                           ),
                         ),
                       ],
@@ -327,6 +383,23 @@ class _TaskPageState extends State<TaskPage> {
   Widget _viewAllTasks() {
     // Temporary placeholder - return an empty container
     return Container();
+  }
+
+  Widget _buildLegendItem(String text, Color color, int count) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text('$count $text', style: TextStyle(fontSize: 12)),
+      ],
+    );
   }
 
   void _handleTaskCreation() async {

@@ -40,13 +40,11 @@ class MyBottomNavBar extends StatelessWidget {
         tabs: const [
           GButton(
             icon: Icons.home,
-            text: 'Blogs',
-            // Remove textColor from here as it's handled by textStyle
+            text: 'Tasks',
           ),
           GButton(
             icon: Icons.calendar_view_week_outlined,
             text: 'Calendar',
-            // Remove textColor from here as it's handled by textStyle
           ),
         ],
       ),

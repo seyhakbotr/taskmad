@@ -14,6 +14,7 @@ class AddTaskDialog extends StatefulWidget {
   final String initialPriority;
   final Topic? initialTopic;
   final String? initialImage;
+  final bool isEdit;
   final List<Topic> availableTopics;
   final ValueChanged<String> onPriorityChanged;
   final ValueChanged<String> onStatusChanged;
@@ -29,6 +30,7 @@ class AddTaskDialog extends StatefulWidget {
     required this.dueDateController,
     this.initialPriority = 'medium',
     this.initialTopic,
+    this.isEdit = false,
     required this.availableTopics,
     required this.onPriorityChanged,
     required this.onStatusChanged,
@@ -47,6 +49,7 @@ class AddTaskDialog extends StatefulWidget {
     String initialStatus = 'todo',
     Topic? initialTopic,
     String? initialImage,
+    bool isEdit = false,
     required List<Topic> availableTopics,
     required ValueChanged<String> onPriorityChanged,
     required ValueChanged<File?> onImageSelected,
@@ -66,6 +69,7 @@ class AddTaskDialog extends StatefulWidget {
         onStatusChanged: onStatusChanged,
         initialTopic: initialTopic,
         initialImage: initialImage,
+        isEdit: isEdit,
         availableTopics: availableTopics,
         onTopicChanged: onTopicChanged,
         onImageSelected: onImageSelected,
@@ -148,7 +152,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add New Task'),
+      title: Text(widget.isEdit ? 'Edit Task' : 'Add Task'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -312,7 +316,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
             widget.onCreatePressed();
             Navigator.pop(context);
           },
-          child: const Text('Create'),
+          child: Text(widget.isEdit ? 'Update' : 'Create'),
         ),
       ],
     );

@@ -79,13 +79,13 @@ class TaskOperationCubit extends Cubit<TaskOperationState> {
   Future<void> updateExistingTask({
     required String taskId,
     File? image,
-    required String title,
-    required String description,
+    String? title,
+    String? description,
     required String creatorId,
-    required DateTime dueDate,
-    required String priority,
-    required String status,
-    required List<Topic> topics,
+    DateTime? dueDate,
+    String? priority,
+    String? status,
+    List<Topic>? topics,
     String? currentImageUrl,
   }) async {
     emit(TaskOperationUpdating());

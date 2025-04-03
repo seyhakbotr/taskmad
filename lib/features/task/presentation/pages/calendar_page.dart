@@ -4,10 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:taskmanage/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:taskmanage/core/themes/app_pallete.dart';
+import 'package:taskmanage/core/utils/format_due_date.dart';
 import 'package:taskmanage/features/task/domain/entities/task.dart';
 import 'package:taskmanage/features/task/domain/usecases/tasks/get_user_tasks.dart';
 import 'package:taskmanage/features/task/presentation/cubit/task_operation_cubit.dart';
 import 'package:taskmanage/features/task/presentation/cubit/task_operation_state.dart';
+import 'package:taskmanage/features/task/presentation/pages/task_viewer_page.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -154,18 +156,72 @@ class _CalendarPageState extends State<CalendarPage> {
                         final task = selectedDayTasks[index];
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 4),
-                          child: ListTile(
-                            title: Text(task.title),
-                            subtitle: Text(task.description ?? ''),
-                            trailing: Text(
-                              task.priority ?? '',
-                              style: TextStyle(
-                                color: _getPriorityColor(task.priority),
+                          child: Stack(
+                            children: [
+                              ListTile(
+                                title: Text(task.title),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(task.description ?? ''),
+                                    if (task.dueDate != null)
+                                      Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 4.0),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.access_time,
+                                                size: 14,
+                                                color: Colors.grey[600],
+                                              ),
+                                              const SizedBox(
+                                                  width:
+                                                      4), // Add some spacing between icon and text
+                                              Text(
+                                                "Due: ${formatDueDate(task.dueDate!)}",
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          )),
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          TaskViewerPage(task: task),
+                                    ),
+                                  );
+                                },
                               ),
-                            ),
-                            onTap: () {
-                              // Navigate to task details or edit
-                            },
+                              if (task.priority != null &&
+                                  task.priority!.isNotEmpty)
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getPriorityColor(task.priority),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      task.priority!.toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         );
                       },

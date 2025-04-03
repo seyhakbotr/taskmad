@@ -1,9 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:taskmanage/core/common/cubits/app_theme/theme_cubit.dart';
-import 'package:taskmanage/core/common/cubits/app_theme/theme_state.dart';
 import 'package:taskmanage/core/common/widgets/navigation_tile.dart';
+import 'package:taskmanage/core/themes/app_pallete.dart';
 import 'package:taskmanage/features/auth/presentation/pages/account_page.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -14,7 +11,13 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: Text(
+          "Settings",
+          style: TextStyle(
+            color: AppPallete.gradient1,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -24,36 +27,36 @@ class SettingsPage extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 600),
         child: Column(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
-              margin: const EdgeInsets.only(left: 25, right: 25, top: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Dark Mode",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.inversePrimary),
-                  ),
-                  BlocBuilder<ThemeCubit, ThemeState>(
-                    builder: (context, themeState) {
-                      return CupertinoSwitch(
-                        value: themeState.themeMode == ThemeModeType.dark,
-                        onChanged: (value) {
-                          context
-                              .read<ThemeCubit>()
-                              .toggleTheme(); // Toggle theme on switch change
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
+            //Container(
+            //  decoration: BoxDecoration(
+            //      color: Theme.of(context).colorScheme.secondary,
+            //      borderRadius: BorderRadius.circular(12)),
+            //  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
+            //  margin: const EdgeInsets.only(left: 25, right: 25, top: 10),
+            //  child: Row(
+            //    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //    children: [
+            //      Text(
+            //        "Dark Mode",
+            //        style: TextStyle(
+            //            fontWeight: FontWeight.bold,
+            //            color: Theme.of(context).colorScheme.inversePrimary),
+            //      ),
+            //      BlocBuilder<ThemeCubit, ThemeState>(
+            //        builder: (context, themeState) {
+            //          return CupertinoSwitch(
+            //            value: themeState.themeMode == ThemeModeType.dark,
+            //            onChanged: (value) {
+            //              context
+            //                  .read<ThemeCubit>()
+            //                  .toggleTheme(); // Toggle theme on switch change
+            //            },
+            //          );
+            //        },
+            //      ),
+            //    ],
+            //  ),
+            //),
             NavigationTile(
               title: "Account",
               routeBuilder: (context) => const AccountPage(),

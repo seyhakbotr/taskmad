@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:taskmanage/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:taskmanage/core/common/widgets/loader.dart';
 import 'package:taskmanage/core/themes/app_pallete.dart';
+import 'package:taskmanage/core/utils/get_status_color.dart';
+import 'package:taskmanage/core/utils/get_status_icon.dart';
+import 'package:taskmanage/core/utils/get_status_text.dart';
 import 'package:taskmanage/core/utils/pick_image.dart';
 import 'package:taskmanage/core/utils/show_snackbar.dart';
 import 'package:taskmanage/features/task/data/models/task_model.dart';
@@ -109,6 +112,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
     if (tasks.isEmpty) {
       return _buildEmptyState();
     }
+
     return RefreshIndicator(
       onRefresh: () => _fetchTasks(context),
       child: ListView.separated(
@@ -139,8 +143,10 @@ class _TaskListWidgetState extends State<TaskListWidget> {
   }
 
   Widget _buildTaskItem(Task task, BuildContext context) {
+    final taskModel = TaskModel.fromEntity(task);
+
     return Dismissible(
-      key: Key(task.id!),
+      key: Key(task.id ?? UniqueKey().toString()),
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
@@ -181,7 +187,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Task title and menu
+              // Task title and menu with status chip
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -195,55 +201,79 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                       ),
                     ),
                   ),
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert,
-                        color: AppPallete.gradient1),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'view',
-                        child: Row(
-                          children: [
-                            Icon(Icons.visibility, color: AppPallete.gradient1),
-                            SizedBox(width: 8),
-                            Text('View Details'),
-                          ],
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _showStatusMenu(context, taskModel),
+                        child: Chip(
+                          label: Text(
+                            getStatusText(taskModel.status ?? 'todo'),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor:
+                              getStatusColor(taskModel.status ?? 'todo'),
+                          avatar: Icon(
+                            getStatusIcon(taskModel.status ?? 'todo'),
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, color: AppPallete.gradient1),
-                            SizedBox(width: 8),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
+                      const SizedBox(width: 8),
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert,
+                            color: AppPallete.gradient1),
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'view',
+                            child: Row(
+                              children: [
+                                Icon(Icons.visibility,
+                                    color: AppPallete.gradient1),
+                                SizedBox(width: 8),
+                                Text('View Details'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, color: AppPallete.gradient1),
+                                SizedBox(width: 8),
+                                Text('Edit'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text('Delete',
+                                    style: TextStyle(color: Colors.red)),
+                              ],
+                            ),
+                          ),
+                        ],
+                        onSelected: (value) {
+                          if (value == 'view') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TaskViewerPage(task: task),
+                              ),
+                            );
+                          } else if (value == 'edit') {
+                            _showEditDialog(context, task);
+                          } else if (value == 'delete') {
+                            _confirmDelete(context, task);
+                          }
+                        },
                       ),
                     ],
-                    onSelected: (value) {
-                      if (value == 'view') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TaskViewerPage(task: task),
-                          ),
-                        );
-                      } else if (value == 'edit') {
-                        _showEditDialog(context, task);
-                      } else if (value == 'delete') {
-                        _confirmDelete(context, task);
-                      }
-                    },
                   ),
                 ],
               ),
@@ -257,7 +287,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
                 ),
               ],
 
-              // Topics display (NEW SECTION)
+              // Topics display
               if (task.topics?.isNotEmpty ?? false) ...[
                 const SizedBox(height: 8),
                 Wrap(
@@ -274,7 +304,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
               ],
 
               // Due date and priority
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   if (task.dueDate != null) ...[
@@ -316,6 +346,61 @@ class _TaskListWidgetState extends State<TaskListWidget> {
     } catch (e) {
       return AppPallete.gradient1;
     }
+  }
+
+  void _showStatusMenu(BuildContext context, TaskModel task) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading:
+                  const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+              title: const Text('To Do'),
+              onTap: () {
+                _updateTaskStatus(context, task.copyWith(status: 'todo'));
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.autorenew, color: Colors.blue),
+              title: const Text('In Progress'),
+              onTap: () {
+                _updateTaskStatus(
+                    context, task.copyWith(status: 'in_progress'));
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle, color: Colors.green),
+              title: const Text('Done'),
+              onTap: () {
+                _updateTaskStatus(context, task.copyWith(status: 'done'));
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Method to update task status
+  void _updateTaskStatus(BuildContext context, TaskModel updatedTask) {
+    if (updatedTask.id == null ||
+        updatedTask.status == null ||
+        updatedTask.creatorId == null) {
+      showSnackBar(context, "Missing required task information");
+      return;
+    }
+
+    context.read<TaskOperationCubit>().updateExistingTask(
+          taskId: updatedTask.id!,
+          creatorId: updatedTask.creatorId!, // Add null check here
+          status: updatedTask.status!,
+        );
   }
 
   Color _getPriorityColor(String priority) {
@@ -381,6 +466,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
       initialImage: taskModel.imageUrl,
       initialTopic: selectedTopic,
       availableTopics: widget.allTaskTopics,
+      isEdit: true,
       onPriorityChanged: (priority) {
         updatedTask = taskModel.copyWith(priority: priority);
       },

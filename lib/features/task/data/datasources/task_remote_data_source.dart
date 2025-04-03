@@ -19,7 +19,7 @@ abstract interface class TaskRemoteDataSource {
   Future<TaskModel> updateTask(TaskModel task);
 
   Future<List<Topic>> getAllTaskTopics();
-  Future<void> updateTaskTopics(String taskId, List<Topic> topics);
+  Future<void> updateTaskTopics(String taskId, List<Topic>? topics);
 }
 
 class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
@@ -132,18 +132,18 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   }
 
   @override
-  Future<void> updateTaskTopics(String taskId, List<Topic> topics) async {
+  Future<void> updateTaskTopics(String taskId, List<Topic>? topics) async {
     try {
       await supabaseClient.from('task_topics').delete().eq('task_id', taskId);
 
-      final topicEntries = topics.map((topic) {
+      final topicEntries = topics?.map((topic) {
         return {
           'task_id': taskId,
           'topic_id': topic.id,
         };
       }).toList();
 
-      await supabaseClient.from('task_topics').insert(topicEntries);
+      await supabaseClient.from('task_topics').insert(topicEntries ?? '');
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
